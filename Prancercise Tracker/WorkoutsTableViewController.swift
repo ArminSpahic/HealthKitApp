@@ -38,7 +38,7 @@ class WorkoutsTableViewController: UITableViewController {
     case finishedCreatingWorkout
   }
   
-  private var workouts: [HKWorkout]?
+  private var workouts: [Workout]?
   
   private let prancerciseWorkoutCellID = "PrancerciseWorkoutCell"
   
@@ -60,7 +60,58 @@ class WorkoutsTableViewController: UITableViewController {
   }
   
   func reloadWorkouts() {
-    
+    WorkoutDataStore.loadPrancerciseWorkouts { (workouts, error) in
+        if let _ = error {
+            print("Error occured while loading workouts")
+        }
+        
+        self.workouts = []
+        workouts?.forEach({ self.workouts?.append(Workout(workout: $0)) })
+        self.tableView.reloadData()
+    }
   }
   
+}
+
+extension WorkoutsTableViewController {
+    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return workouts?.count ?? 0
+    }
+    
+    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        guard let workouts = workouts else {
+            fatalError("""
+            CellForRowAtIndexPath should \not get called if there are no workouts
+            """)
+        }
+        
+        let cell = tableView.dequeueReusableCell(withIdentifier: prancerciseWorkoutCellID, for: indexPath)
+        
+        let workout = workouts[indexPath.row]
+        
+        cell.textLabel?.text = workout.title
+        cell.detailTextLabel?.text = workout.subtitle
+        //cell.textLabel?.text = dateFormatter.string(from:  workout.startDate)
+        
+//        if let caloriesBurned = workout.totalEnergyBurned?.doubleValue(for: .kilocalorie())  {
+//            let formattedCalories = String(format: "CaloriesBurned: %.2f", caloriesBurned)
+//            cell.detailTextLabel?.text = formattedCalories
+//        } else {
+//            cell.detailTextLabel?.text = nil
+//        }
+        return cell
+    }
+}
+
+struct Workout {
+    let title: String
+    let subtitle: String
+    
+    init(workout: HKWorkout) {
+        
+        self.title = BaseUtilities.shared.dateFormatter.string(from: workout.startDate)
+        self.subtitle = String(format: "CaloriesBurned: %.2f", workout.totalEnergyBurned?.doubleValue(for: .kilocalorie()) ?? 0.0)
+    }
+    
+    
 }

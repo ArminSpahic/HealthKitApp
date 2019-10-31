@@ -30,7 +30,7 @@
 
 import Foundation
 
-struct PrancerciseWorkout {
+struct PrancerciseWorkoutInterval {
   
   var start: Date
   var end: Date
@@ -54,4 +54,28 @@ struct PrancerciseWorkout {
     
     return totalCalories
   }
+}
+
+struct PrancerciseWorkout {
+    var start: Date
+    var end: Date
+    var intervals: [PrancerciseWorkoutInterval]
+    
+    init(with intervals: [PrancerciseWorkoutInterval]) {
+        self.start = intervals.first!.start
+        self.end = intervals.last!.end
+        self.intervals = intervals
+    }
+    
+    var totalEnergyBurned: Double {
+        return intervals.reduce(0) { (result, interval) in
+            result + interval.totalEnergyBurned
+        }
+    }
+    
+    var duration: TimeInterval {
+        return intervals.reduce(0) { (result, interval) in
+            result + interval.duration
+        }
+    }
 }
